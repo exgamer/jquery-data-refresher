@@ -22,7 +22,7 @@
     <div class="js-loader" style="display:none">загрузка</div>       
  </div>
  ```
- ####js
+ #### JS
  
  ```
 $(document).on('click','.js-infinite',function(e){
@@ -46,7 +46,7 @@ $(document).on('click','.js-infinite',function(e){
                 data-refresh-block-url="/refresh/block/url">показать форму в модальном окне</a>
     </div>
   ```
-  ####js
+ #### JS
  ```
 $(document).on('click', '.ghost-modal-control', function(e){
 	e.preventDefault();
@@ -78,7 +78,7 @@ $(document).on('click', '.ghost-modal-control', function(e){
 
     </form>
 					
-   ####js
+ #### JS
  ```
 $(document).off('submit', '.refresher-form');
 $(document).on('submit', '.refresher-form', function(event) {
