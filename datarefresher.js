@@ -46,26 +46,10 @@
  *               }
  *           },
  *           'formCompleteCallback': function () {
- *               $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').each(function () {
- *                   if ($(this).val() || $(this).text()) {
- *                       $(this).addClass('active');
- *                   } else {
- *                       $(this).removeClass('active');
- *                  }
- *               });
- *             $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').off('blur');
- *               $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').on('blur', function () {
- *                   if ($(this).val() || $(this).text()) {
- *                       $(this).addClass('active');
- *                   } else {
- *                       $(this).removeClass('active');
- *                   }
- *               });
+ *               .................
  *           },
  *           'completeCallback': function () {
- *               if(typeof donutValues !== 'undefined'){
- *                   intel.complaint.processDonutValues(donutValues)
- *               }
+ *                  ..............
  *           }
  *       });
  *
