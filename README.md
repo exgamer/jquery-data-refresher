@@ -1,21 +1,19 @@
-# jquery-data-refresher
+# jquery-data-refresher Плагин для обновления HTML контента
 
-
-  Плагин для обновления HTML контента
- 
-  требует jquery и плагин bPopup
+## требует jquery и плагин bPopup
  
  
-  Пример вызова для обновления HTMl элемента
-  можно указать несколько dataContainerId через запятую
+  ### Пример вызова для обновления HTMl элемента
+  #### можно указать несколько dataContainerId через запятую
 ```
   $( ".button").dataRefresher('update', {'dataUrl': '/index', 'dataContainerId': 'blockToRefresh'});
  ```
 
 
-/**
- * Пример реализации бесконечного списка
- */
+
+### Пример реализации бесконечного списка
+
+ #### HTML
  ```
  <div  id="infinite-list">     
     <a class="js-infinite" data-container-id="infinite-list" data-url="/url">
@@ -24,6 +22,7 @@
     <div class="js-loader" style="display:none">загрузка</div>       
  </div>
  ```
+ ####js
  
  ```
 $(document).on('click','.js-infinite',function(e){
@@ -35,9 +34,19 @@ $(document).on('click','.js-infinite',function(e){
 
 ```
 
-/**
- * Для вывода модалки с формой
- */
+
+### Для вывода модульного окна с формой и обнвления контента указанного блока
+
+ #### HTML
+ ```
+     <div  id="container">
+             <a class="ghost-modal-control" data-refresh-block-id="container"
+                data-modal-title="my modal"
+                data-form-url="/form/url"
+                data-refresh-block-url="/refresh/block/url">показать форму в модальном окне</a>
+    </div>
+  ```
+  ####js
  ```
 $(document).on('click', '.ghost-modal-control', function(e){
 	e.preventDefault();
@@ -59,10 +68,17 @@ $(document).on('click', '.ghost-modal-control', function(e){
 });
 ```
 
-/**
- * Для ajax сабмита форм
- */
- 
+
+### Для ajax сабмита форм
+
+ #### HTML
+    <form  class="refresher-form" method="POST" action="/" enctype="multipart/form-data">
+            .....
+            <button class="btn btn-send-request" type="submit">отправить</button>
+
+    </form>
+					
+   ####js
  ```
 $(document).off('submit', '.refresher-form');
 $(document).on('submit', '.refresher-form', function(event) {
