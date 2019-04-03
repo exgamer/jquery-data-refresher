@@ -40,16 +40,35 @@
  *           'dataUrl' : $(this).attr('data-refresh-block-url'),
  *           'dataContainerId' : $(this).attr('data-refresh-block-id'),
  *           'modalTitle' : $(this).attr('data-modal-title'),
+ *	         'formExtraDataCallback': function (data) {
+ *			     return  {name: 'wordlist', value: "sdfsdfsd"};
+ *		     },
  *           'formSuccessCallback': function (data) {
  *               if(data.data !== undefined && data.data.redirectUrl !== undefined) {
  *                   location.href = data.data.redirectUrl;
  *               }
  *           },
  *           'formCompleteCallback': function () {
- *               .................
+ *               $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').each(function () {
+ *                   if ($(this).val() || $(this).text()) {
+ *                       $(this).addClass('active');
+ *                   } else {
+ *                       $(this).removeClass('active');
+ *                  }
+ *               });
+ *             $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').off('blur');
+ *               $('.animated-field input, .animated-field textarea, .animated-field select, .animated-field [contenteditable]').on('blur', function () {
+ *                   if ($(this).val() || $(this).text()) {
+ *                       $(this).addClass('active');
+ *                   } else {
+ *                       $(this).removeClass('active');
+ *                   }
+ *               });
  *           },
  *           'completeCallback': function () {
- *                  ..............
+ *               if(typeof donutValues !== 'undefined'){
+ *                   intel.complaint.processDonutValues(donutValues)
+ *               }
  *           }
  *       });
  *
@@ -57,6 +76,7 @@
  * settings['formDataUrl'] - url на который будет послан GET запрос для получения html формы
  * settings['formSendUrl'] - url на который будет послан POST запрос c данными формы (если не указан будет использован settings['formDataUrl'])
  * settings['formSuccessCallback'] - пользовательская функция которая выполнится по успешному выполнению запроса  от settings['formDataUrl'] или settings['formSendUrl']
+ * settings['formExtraDataCallback'] - пользовательская функция которая выполнится до выполнения запроса для внесения доплонительных данных в отсылаемую форму  от settings['formDataUrl'] или settings['formSendUrl']
  * settings['formCompleteCallback'] - пользовательская функция которая выполнится по выполнению запроса в любом случае от settings['formDataUrl'] или settings['formSendUrl']
  * settings['dataUrl'] - url на который будет послан GET запрос для получения обновленных данных в блоке settings['dataContainerId']
  *
@@ -91,15 +111,16 @@
         'successCallback' : undefined,
         'completeCallback' : undefined,
         'formSuccessCallback' : undefined,
+        'formExtraDataCallback' : undefined,
         'formCompleteCallback' : undefined,
         'modalHtml' :  "    <div id=\"{%modal-id%}\" class=\"add-review-popup modal popup block\">\n" +
-                    "        <div class=\"header block-section\"><span class=\"{%modal-title-class%}\">{%modal-title-caption%}</span>\n" +
-                "            <a class=\"{%modal-close-class%}\" href=\"#\"><i class=\"icon icon-close\"></i></a>\n" +
-                "        </div>\n" +
-                "        <div id='{%modal-body-id%}'>\n" +
-                "        {%modal-body%}" +
-                "        </div>" +
-                "    </div>",
+            "        <div class=\"header block-section\"><span class=\"{%modal-title-class%}\">{%modal-title-caption%}</span>\n" +
+            "            <a class=\"{%modal-close-class%}\" href=\"#\"><i class=\"icon icon-close\"></i></a>\n" +
+            "        </div>\n" +
+            "        <div id='{%modal-body-id%}'>\n" +
+            "        {%modal-body%}" +
+            "        </div>" +
+            "    </div>",
         "modalId": "js-magic-modal",
         "modalCloseClass": "close-popup",
         'modalOnCloseCallback' : undefined,
@@ -115,7 +136,7 @@
      */
     var doCallback = function (callback, data) {
         if(callback != undefined && typeof callback == 'function'){
-            eval(callback)(data);
+            return eval(callback)(data);
         }
     }
 
@@ -199,77 +220,85 @@
      */
     var submitForm = function(form, isModal = true)
     {
-            var formSendUrl = form.attr('action');
-            if (settings['formSendUrl'] != undefined){
-                formSendUrl = settings['formSendUrl'];
+        var formSendUrl = form.attr('action');
+        if (settings['formSendUrl'] != undefined){
+            formSendUrl = settings['formSendUrl'];
+        }
+        var data = form.serialize();
+        var extraData = undefined;
+        extraData = doCallback(settings['formExtraDataCallback'], extraData);
+        if (extraData !== undefined && extraData !== null && typeof extraData === "object"){
+            for (var k in extraData){
+                data+="&"+k+"="+extraData[k];
             }
-            updateData(
-                formSendUrl,
-                "POST",
-                form.serialize(),
-                function( ){
-                    /**
-                     * Вырубаем кнопку сабмита перед запросом
-                     */
-                    var buttons = form.find("[type='submit']");
-                    if(buttons.length > 0) {
-                        buttons.attr('disabled', 'disabled');
-                    }
-                },
-                function(data){
-                    /**
-                     * Если ответ содержит форму значит нужно обновить ее,
-                     * если нет закрываем окно
-                     */
-                    var $responseDom = $('<div/>').html(data);
-                    var $responseForm = $responseDom.find('form');
-                    if ($responseForm.length > 0){
-                        form.replaceWith($responseForm);
-                    }else {
-                        if (isModal) {
-                            /**
-                             * Закрываем модальное окно
-                             */
-                            $('#' +  settings['modalId']).bPopup().close();
-                        }
+        }
+        updateData(
+            formSendUrl,
+            "POST",
+            data,
+            function( ){
+                /**
+                 * Вырубаем кнопку сабмита перед запросом
+                 */
+                var buttons = form.find("[type='submit']");
+                if(buttons.length > 0) {
+                    buttons.attr('disabled', 'disabled');
+                }
+            },
+            function(data){
+                /**
+                 * Если ответ содержит форму значит нужно обновить ее,
+                 * если нет закрываем окно
+                 */
+                var $responseDom = $('<div/>').html(data);
+                var $responseForm = $responseDom.find('form');
+                if ($responseForm.length > 0){
+                    form.replaceWith($responseForm);
+                }else {
+                    if (isModal) {
                         /**
-                         * Если указан settings['dataUrl'] и settings['dataContainerId'] делаем запрос и обновляем блок
+                         * Закрываем модальное окно
                          */
-                        if (settings['dataUrl'] != undefined && settings['dataContainerId'] != undefined){
-                            updateData(
-                                settings['dataUrl'],
-                                "GET",
-                                {},
-                                function( ){
-                                    doCallback(settings['beforeSendCallback']);
-                                },
-                                function(data){
-                                    updateDomElement(data, settings['dataContainerId']);
-                                    doCallback(settings['successCallback'], data);
-                                },
-                                function(){
-                                    doCallback(settings['completeCallback']);
-                                },
-                            );
-                        }
+                        $('#' +  settings['modalId']).bPopup().close();
                     }
-                    doCallback(settings['formSuccessCallback'], data);
-                },
-                function(){
-                    doCallback(settings['formCompleteCallback']);
-                },
-            );
+                    /**
+                     * Если указан settings['dataUrl'] и settings['dataContainerId'] делаем запрос и обновляем блок
+                     */
+                    if (settings['dataUrl'] != undefined && settings['dataContainerId'] != undefined){
+                        updateData(
+                            settings['dataUrl'],
+                            "GET",
+                            {},
+                            function( ){
+                                doCallback(settings['beforeSendCallback']);
+                            },
+                            function(data){
+                                updateDomElement(data, settings['dataContainerId']);
+                                doCallback(settings['successCallback'], data);
+                            },
+                            function(){
+                                doCallback(settings['completeCallback']);
+                            },
+                        );
+                    }
+                }
+                doCallback(settings['formSuccessCallback'], data);
+            },
+            function(){
+                doCallback(settings['formCompleteCallback']);
+            },
+        );
     };
 
     /**
      * Показать модалку с формой
      *
      * $( this).dataRefresher('showModalForm', {
-	 *	 'formHtmlUrl' : 'get/form/html',
-	 *	 'dataUrl' : 'get/refresh/block/data/html',
-	 * 	 'dataContainerId' : 'refresh-block-id',
-	 *   'modalTitle' : 'modal form',
-	 * });
+     *	 'formHtmlUrl' : 'get/form/html',
+     *	 'dataUrl' : 'get/refresh/block/data/html',
+     * 	 'dataContainerId' : 'refresh-block-id',
+     *   'modalTitle' : 'modal form',
+     * });
      */
     var showModalForm = function(modalBody)
     {
@@ -382,15 +411,15 @@
          *
          * $( this).dataRefresher('update', {'dataUrl':data_url, 'dataContainerId':data_container_id,
          *     'beforeSendCallback': function () {
-		 *        alert("beforeSendCallback");
-		  *     },
+         *        alert("beforeSendCallback");
+         *     },
          *      'successCallback': function (data) {
-		 *        alert(data);
-		  *     },
+         *        alert(data);
+         *     },
          *      'completeCallback': function (data) {
          *        alert("completeCallback");
          *     },
-		  *
+         *
         });
          */
         update : function() {

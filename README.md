@@ -55,6 +55,9 @@ $(document).on('click', '.ghost-modal-control', function(e){
 		 'dataUrl' : $(this).attr('data-refresh-block-url'),
 		 'dataContainerId' : $(this).attr('data-refresh-block-id'),
 	     'modalTitle' : $(this).attr('data-modal-title'),
+         'formExtraDataCallback': function (data) {
+             return  {name: 'wordlist', value: "sdfsdfsd"};
+         },
 		 'formSuccessCallback': function (data) {
               ....
 		 },
@@ -88,6 +91,9 @@ $(document).on('submit', '.refresher-form', function(event) {
 		'dataUrl' : $(this).attr('data-refresh-block-url'),
 		'dataContainerId' : $(this).attr('data-refresh-block-id'),
 		'modalTitle' : $(this).attr('data-modal-title'),
+         'formExtraDataCallback': function (data) {
+             return  {name: 'wordlist', value: "sdfsdfsd"};
+         },
 		'formSuccessCallback': function (data) {
             ...
 		},
