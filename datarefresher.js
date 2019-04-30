@@ -100,6 +100,8 @@
  * @author citizenzet exgamer@live.ru
  */
 (function( $ ) {
+    var element;
+
     var settings = {
         'formHtmlUrl' : undefined,
         'formSendUrl' : undefined,
@@ -190,7 +192,7 @@
      * @param successCallback
      * @param completeCallback
      */
-    var updateData = function(url, method, postData, beforeSendCallback, successCallback, completeCallback)
+    var updateData = function(url, method, postData, beforeSendCallback, successCallback, completeCallback, errorCallback)
     {
         $.ajax({
             type: method,
@@ -204,7 +206,7 @@
                 doCallback(successCallback, data);
             },
             error: function(xhr) { // if error occured
-
+                doCallback(errorCallback);
             },
             complete: function() {
                 doCallback(completeCallback);
@@ -279,6 +281,8 @@
                             function(){
                                 doCallback(settings['completeCallback']);
                             },
+                            function(){
+                            },
                         );
                     }
                 }
@@ -286,6 +290,8 @@
             },
             function(){
                 doCallback(settings['formCompleteCallback']);
+            },
+            function(){
             },
         );
     };
@@ -349,6 +355,11 @@
          *	});
          */
         showModal : function() {
+            var $this = this;
+            if ($this.attr('disabled') != undefined){
+                return;
+            }
+            $this.attr('disabled', true);
             updateData(
                 settings['dataUrl'],
                 "GET",
@@ -362,6 +373,10 @@
                 },
                 function(){
                     doCallback(settings['completeCallback']);
+                    $this.removeAttr('disabled');
+                },
+                function(){
+                    $this.removeAttr('disabled');
                 },
             );
 
@@ -377,6 +392,11 @@
          *  });
          */
         showModalForm : function() {
+            var $this = this;
+            if ($this.attr('disabled') != undefined){
+                return;
+            }
+            $this.attr('disabled', true);
             updateData(
                 settings['formHtmlUrl'],
                 "GET",
@@ -390,6 +410,10 @@
                 },
                 function(){
                     doCallback(settings['completeCallback']);
+                    $this.removeAttr('disabled');
+                },
+                function(){
+                    $this.removeAttr('disabled');
                 },
             );
         },
@@ -423,6 +447,11 @@
         });
          */
         update : function() {
+            var $this = this;
+            if ($this.attr('disabled') != undefined){
+                return;
+            }
+            $this.attr('disabled', true);
             updateData(
                 settings['dataUrl'],
                 "GET",
@@ -436,6 +465,10 @@
                 },
                 function(){
                     doCallback(settings['completeCallback']);
+                    $this.removeAttr('disabled');
+                },
+                function(){
+                    $this.removeAttr('disabled');
                 },
             );
         },
@@ -488,6 +521,8 @@
                     $this.show();
                     $('.' + settings['loaderClass']).hide();
                     doCallback(settings['completeCallback']);
+                },
+                function(){
                 },
             );
         }
