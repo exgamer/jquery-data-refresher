@@ -226,12 +226,12 @@
         if (settings['formSendUrl'] != undefined){
             formSendUrl = settings['formSendUrl'];
         }
-        var data = form.serialize();
+        var data = form.serializeArray();
         var extraData = undefined;
         extraData = doCallback(settings['formExtraDataCallback'], extraData);
         if (extraData !== undefined && extraData !== null && typeof extraData === "object"){
             for (var k in extraData){
-                data+="&"+k+"="+extraData[k];
+                data.push({name: k, value: extraData[k]});
             }
         }
         updateData(
